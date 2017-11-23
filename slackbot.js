@@ -12,6 +12,8 @@ let keys = Object.keys(triggerWords.public_commands);
 let channel;
 let botChannel = 'general';
 
+let HELP_RESPONSE = "Please tell me which topic below you would like to know more about, by typing it;\n\n" + Object.keys(triggerWords.public_commands).join("\n") + "\n\nIf you at any time want a reminder about these topics again, type `!help` in a private chat to me, to show this message.";
+let HELP_PUBLIC_CHAT_RESPONSE = "Kindly send me commands as direct messages (by talking to me directly). This keeps the channels nice and clean.\n\n";
 // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
   for (const c of rtmStartData.channels) {
@@ -35,66 +37,23 @@ rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, function () {
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
-    console.log(message);
-    let channel = undefined;
-    let command = undefined;
-    let response = undefined;
-    let publicChannelResponse = false;
     try {
         if(message.text.substr(0,1) === "!") {
-            publicChannelResponse = true;
-            console.log("Command is for public channel, remembering and removing ! from string");
-            message.text = message.text.substr(1, message.text.length);
-        }
-        for(let i = 0; i < keys.length; i++) {
-            //console.log('incoming text, possible command: ' +message.text + ', looping keys, matching: ' +keys[i]);
-            if(message.text === keys[i] || message.text === 'help') {
-                command = message.text;
-            }
-        }
-        if(command !== undefined) {
-            // TODO This duplication of code is really unnecessary. Fix it.
-            if(command === 'help') {
-                response = "Please tell me which topic below you would like to know more about, by typing it;\n\n" + Object.keys(triggerWords.public_commands).join("\n") + "\n\nIf you at any time want a reminder about these topics again, type `help` in a private chat to me, to show this message.";
-                if(publicChannelResponse) {
-                    console.log("This is a public message, responding to channel...");
-                    channel = message.channel;
-
-                    rtm.sendMessage(response, channel);
-                } else {
-                    console.log("This is a private message, responding to user...");
-                    channel = message.user;
-                    //console.log(response);
-                    // https://github.com/slackapi/node-slack-sdk/issues/148
-                    web.im.open(channel, function (err, resp) {
-                        // Check `err` for any errors.
-                        // `resp` is the parsed response from the api.
-                        // Check API docs for what `resp` can be.
-                        //console.log(resp);
-                        rtm.sendMessage(response, resp.channel.id);
-                    });
-                }
-                return;
-            }
-            console.log("Command found!: " +command);
-            if(publicChannelResponse) {
-                console.log("This is a public message, responding to channel...");
-                channel = message.channel;
-                response = triggerWords.public_commands[command];
-
-                rtm.sendMessage(response, channel);
-            } else {
-                console.log("This is a private message, responding to user...");
-                channel = message.user;
-                response = triggerWords.public_commands[command];
-                // https://github.com/slackapi/node-slack-sdk/issues/148
-                web.im.open(channel, function(err, resp) {
-                    // Check `err` for any errors.
-                    // `resp` is the parsed response from the api.
-                    // Check API docs for what `resp` can be.
-                    // console.log(resp);
-                    rtm.sendMessage(response, resp.channel.id);
+            console.log("Command is for DM channel, remembering and removing ! from string");
+            //message.text = message.text.substr(1, message.text.length);
+            try {
+                web.channels.info(message.channel).then(info => {
+                    if(info.ok) {
+                        console.log("This is public channel sent");
+                        prepareMessage(message.user, message, HELP_PUBLIC_CHAT_RESPONSE);
+                    }
+                }).catch(function (e) {
+                    //console.log(e);
+                    console.log("This is private channel sent");
+                    prepareMessage(message.user, message, "");
                 });
+            } catch(e) {
+                //console.log('Error on matching channels.info with a channel');
             }
         }
     } catch(e) {
@@ -116,4 +75,46 @@ function contains(needle, haystack) {
         v2 = v2.toLowerCase();
     }
     return v.indexOf(v2) > -1;
+}
+
+function prepareMessage(channel, message, prepend) {
+    let command = undefined;
+    let response = prepend;
+    console.log(message.text);
+    console.log(message.channel);
+
+    for(let i = 0; i < keys.length; i++) {
+        //console.log('incoming text, possible command: ' +message.text + ', looping keys, matching: ' +keys[i]);
+        if(message.text === keys[i] || message.text === "help" || message.text === "hepl" || message.text === "halp") {
+            command = message.text;
+        }
+    }
+    if(command !== undefined) {
+        // TODO This duplication of code is really unnecessary. Fix it.
+        if(command === "help" || command === "hepl" || command === "halp") {
+            console.log("This is halp command");
+            response += HELP_RESPONSE;
+            //console.log(response);
+            // https://github.com/slackapi/node-slack-sdk/issues/148
+            sendDM(channel, response);
+            return;
+        }
+        console.log("Command found!: " +command);
+        response = triggerWords.public_commands[command];
+        // https://github.com/slackapi/node-slack-sdk/issues/148
+    } else {
+        console.log("Not understood");
+        response += "BLEEP, BLOOP. I didn't understand that command.\n\n" + HELP_RESPONSE;
+    }
+    sendDM(channel, response);
+}
+
+function sendDM(channel, message) {
+    web.im.open(channel, function(err, resp) {
+        // Check `err` for any errors.
+        // `resp` is the parsed response from the api.
+        // Check API docs for what `resp` can be.
+        // console.log(resp);
+        rtm.sendMessage(message, resp.channel.id);
+    });
 }
