@@ -1,13 +1,24 @@
 {
+        "help": "THIS IS A RESERVED WORD THAT IS DEFINED IN CODE!",
         "public_commands" : {
                 "broken_bases_rules":"#broken_bases is a channel that is designed to help guide people through the trading process.\nIn this channel we share our ideas with the community to gain feedback from our peers about our proposed trade entrances and exits.\n\nPlease be respectful in your responses, there are no bad questions here. Our goal is to help one another to become stronger traders.\n\nAll posts in #broken_bases must contain a chart with a line that is drawn to show the base, and the initial post should comply with this format: `\"BTRX: LTC/BTC  with the base at @ .0147\"`\n\nCharts should:\n* Display 1 hour candlesticks\n* Show a time frame of at least 1 month or more\n* The base should be drawn in to help your fellow community members critique your suggestions.\n\nWe also ask that you discuss your suggested \"safe circle\" entrance zone, and exit if it is relevant to the discussion.\nPlease do not create posts in this channel unless the base has been cracked _and_ we are at least 1/2 way to the trade entry point.\n\nOptional: You may choose to rate the proposed trade using the :good_base: emoticon.",
-                "general_rules":"#general is a set of general rules",
+                "general_rules":"DO NOT POST CHARTS, DISCUSS STRATEGY FOR A SPECIFIC ALT COIN, UPLOAD IMAGES OR FLOOD #general.\nOne message per thought please & always respond in threads. Messages that do not comply will be deleted! :cop: :oncoming_police_car:",
                 "is_this_a_base_rules":"#is_this_a_base When in doubt if a base is a BASE, post *links* to pics here. Please show at least 2 MONTHS of data on your chart, so that your peers can assess your bases. :white_check_mark:",
                 "news_rules":"#news Fresh news about Cryptos. Make sure it's not a repost, has value and credibility and is not several weeks old.  Also Luc's and OneLuckyFlip's link to new blogs will be posted here!",
                 "pullback_trading_rules":"#pullback_trading Analyzing and informing about pull back opportunities on volatile coins. Please inform the community about the coin, volume, exchange, rise and duration, then post links or pictures threaded below your comment. PLEASE READ THE PINNED GUIDE!",
                 "random_rules":"#rand.... C'mon. It's _random_. There are no rules. Except being decent. Be decent, at least.",
                 "scanner_alerts_btc_rules":"#scanner_alerts_btc THIS IS A BOT ONLY CHANNEL! PLEASE DO NOT POST IN THIS CHANNEL, ALL COMMENTS AND POSTS WILL BE DELETED TO KEEP THIS CHANNEL CLEAN,  THANKS! IF YOU HAVE QUESTIONS ABOUT THE BOT, PLEASE USE #general OR #random, THANKS!!",
-                "trade_review_rules":"#trade_review Share your position trade entry and exit points to get community feedback."
+                "trade_review_rules":"#trade_review Share your position trade entry and exit points to get community feedback.",
+                "2fa":"Use Two Factor Authentication when logging in to any of your crypto accounts for added safety. We recommend Authy or Last Pass. Better safe than sorry.",
+                "images":"Please use links instead of uploading images so we can keep this slack clean. :slightly_smiling_face:",
+                "investment":"This community is focused on reactive trading, not investment or TA. There are many resources and other rooms dedicated to crypto investments, TA and investment in general. This room is completely dedicated to trading, specifically trading using the reactive trading methods taught by QuickFingersLuc. To keep the slack useful for people that are here to learn QFL trading method we try not to discuss anything besides reactive trading as to keep the room in line with the intention it was created with.\nThis text is the same in the technical_analysis topic",
+                "marketcycle":"This chart explains the cyclical psychology of all markets.  When the cycle completes, it starts over again. http://thelincolnlist.com/wp-content/uploads/2015/10/Wall-St-Cheat-Sheet.png",
+                "portfolio_value":"https://steemit.com/bitcoin/@ashr/why-i-value-my-crypto-altcoin-portfolio-in-btc-and-eth-and-you-should-too",
+                "qfl_slack_form_for_new_traders":"This is the form for applying to this Slack. Send it to the people that are interested in joining.",
+                "qfl_steem":"The blog for QuickFingersLuc can be found at https://steemit.com/@quickfingersluc",
+                "qfl_trading_document":"Here is a handy document for the QFL method https://sites.google.com/view/trading-steps/home",
+                "technical_analysis":"This community is focused on reactive trading, not investment or TA. There are many resources and other rooms dedicated to crypto investments, TA and investment in general. This room is completely dedicated to trading, specifically trading using the reactive trading methods taught by QuickFingersLuc. To keep the slack useful for people that are here to learn QFL trading method we try not to discuss anything besides reactive trading as to keep the room in line with the intention it was created with.\nthis text is the same in the investment topic.",
+                "threads":"Please use threads when commenting. You can start a thread with the speech bubble on the right side of the comment. Slack is not a chat room. Threads make it easier for us all to communicate.",
+                "trading_funnel":"https://i.imgur.com/q7Cjt3y.jpg"
         }
-
 }

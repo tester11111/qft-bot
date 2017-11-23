@@ -55,7 +55,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
         if(command !== undefined) {
             // TODO This duplication of code is really unnecessary. Fix it.
             if(command === 'help') {
-                response = "Commands:\n\n" + Object.keys(triggerWords.public_commands).join("\n");
+                response = "Please tell me which topic below you would like to know more about, by typing it;\n\n" + Object.keys(triggerWords.public_commands).join("\n") + "\n\nIf you at any time want a reminder about these topics again, type `help` in a private chat to me, to show this message.";
                 if(publicChannelResponse) {
                     console.log("This is a public message, responding to channel...");
                     channel = message.channel;
