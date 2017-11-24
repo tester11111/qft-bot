@@ -12,7 +12,10 @@ let keys = Object.keys(triggerWords.public_commands);
 let channel;
 let botChannel = 'general';
 
-let HELP_RESPONSE = "Please tell me which topic below you would like to know more about, by typing it;\n\n" + Object.keys(triggerWords.public_commands).join("\n") + "\n\nIf you at any time want a reminder about these topics again, type `!help` in a private chat to me, to show this message.";
+let TOPICS_RULES = Object.keys(triggerWords.public_commands.rules).join("\n");
+let TOPICS_GENERAL = Object.keys(triggerWords.public_commands.general).join("\n");
+let COMMANDS_PUBLIC = Object.assign({}, triggerWords.public_commands.rules, triggerWords.public_commands.general);
+let HELP_RESPONSE = "Please tell me which topic below you would like to know more about, by typing it;\n\n*Rules*\n\n" + TOPICS_RULES + "\n\n*General*\n\n" + TOPICS_GENERAL + "\n\nIf you at any time want a reminder about these topics again, type `!help` in a private chat to me, to show this message.";
 let HELP_PUBLIC_CHAT_RESPONSE = "Kindly send me commands as direct messages (by talking to me directly). This keeps the channels nice and clean.\n\n";
 // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
@@ -83,15 +86,21 @@ function prepareMessage(channel, message, prepend) {
     console.log(message.text);
     console.log(message.channel);
 
-    for(let i = 0; i < keys.length; i++) {
-        //console.log('incoming text, possible command: ' +message.text + ', looping keys, matching: ' +keys[i]);
-        if(message.text === keys[i] || message.text === "help" || message.text === "hepl" || message.text === "halp") {
-            command = message.text;
+
+
+    if(message.text === "!help" || message.text === "!hepl" || message.text === "!halp") {
+        command = message.text;
+    } else {
+        for(let i = 0; i < Object.keys(COMMANDS_PUBLIC).length; i++) {
+            let item = Object.keys(COMMANDS_PUBLIC)[i];
+            if(message.text === item) {
+                command = message.text;
+            }
         }
     }
     if(command !== undefined) {
         // TODO This duplication of code is really unnecessary. Fix it.
-        if(command === "help" || command === "hepl" || command === "halp") {
+        if(command === "!help" || command === "!hepl" || command === "!halp") {
             console.log("This is halp command");
             response += HELP_RESPONSE;
             //console.log(response);
@@ -100,7 +109,7 @@ function prepareMessage(channel, message, prepend) {
             return;
         }
         console.log("Command found!: " +command);
-        response = triggerWords.public_commands[command];
+        response = COMMANDS_PUBLIC[command];
         // https://github.com/slackapi/node-slack-sdk/issues/148
     } else {
         console.log("Not understood");
