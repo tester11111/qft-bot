@@ -8,7 +8,7 @@ let web = new WebClient(bot_token);
 let fs = require('fs');
 
 let triggerWords = JSON.parse(fs.readFileSync('./trigger-words.json', 'utf8'));
-let channel;
+let botChannel = undefined;
 
 let TOPICS_RULES = Object.keys(triggerWords.public_commands.rules).join("\n");
 let TOPICS_GENERAL = Object.keys(triggerWords.public_commands.general).join("\n");
@@ -19,14 +19,17 @@ let HELP_PUBLIC_CHAT_RESPONSE = "_Kindly send me commands as direct messages (by
 // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
   for (const c of rtmStartData.channels) {
-    if (c.is_member && (c.name ==='general' || c.name === 'botchat')) { channel = c.id }
+      if (c.is_member && c.name === 'botchat') {
+          console.log('Found botchat');
+          botChannel = c.id;
+      }
   }
-  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name} in channel ${channel}`);
+  console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name} in channel ${botChannel}`);
 });
 
 // you need to wait for the client to fully connect before you can send messages
 rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, function () {
-    rtm.sendMessage("Bot is online!", channel);
+    rtm.sendMessage("Bot is online!", botChannel);
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
