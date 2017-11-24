@@ -8,41 +8,31 @@ let web = new WebClient(bot_token);
 let fs = require('fs');
 
 let triggerWords = JSON.parse(fs.readFileSync('./trigger-words.json', 'utf8'));
-let keys = Object.keys(triggerWords.public_commands);
 let channel;
-let botChannel = 'general';
 
 let TOPICS_RULES = Object.keys(triggerWords.public_commands.rules).join("\n");
 let TOPICS_GENERAL = Object.keys(triggerWords.public_commands.general).join("\n");
 let COMMANDS_PUBLIC = Object.assign({}, triggerWords.public_commands.rules, triggerWords.public_commands.general);
 let HELP_RESPONSE = "Please tell me which topic below you would like to know more about, by typing it;\n\n*Rules*\n\n" + TOPICS_RULES + "\n\n*General*\n\n" + TOPICS_GENERAL + "\n\nIf you at any time want a reminder about these topics again, type `!help` in a private chat to me, to show this message.";
-let HELP_PUBLIC_CHAT_RESPONSE = "Kindly send me commands as direct messages (by talking to me directly). This keeps the channels nice and clean.\n\n";
+let HELP_PUBLIC_CHAT_RESPONSE = "_Kindly send me commands as direct messages (by talking to me directly). This keeps the channels nice and clean._\n\n";
+
 // The client will emit an RTM.AUTHENTICATED event on successful connection, with the `rtm.start` payload
 rtm.on(CLIENT_EVENTS.RTM.AUTHENTICATED, (rtmStartData) => {
   for (const c of rtmStartData.channels) {
-    if (c.is_member && c.name ==='general') { channel = c.id }
+    if (c.is_member && (c.name ==='general' || c.name === 'botchat')) { channel = c.id }
   }
   console.log(`Logged in as ${rtmStartData.self.name} of team ${rtmStartData.team.name} in channel ${channel}`);
 });
 
 // you need to wait for the client to fully connect before you can send messages
 rtm.on(CLIENT_EVENTS.RTM.RTM_CONNECTION_OPENED, function () {
-    web.conversations.list().then(info => {
-        for(let i = 0; i < info.channels.length; i++) {
-            console.log(info.channels[i].name);
-            if(contains(info.channels[i].name, 'botchat')) {
-                botChannel = info.channels[i].id;
-            }
-        }
-        console.log(botChannel);
-        rtm.sendMessage("Bot is online!", botChannel);
-    });
+    rtm.sendMessage("Bot is online!", channel);
 });
 
 rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
     try {
         if(message.text.substr(0,1) === "!") {
-            console.log("Command is for DM channel, remembering and removing ! from string");
+            //console.log("Command is for DM channel, remembering and removing ! from string");
             //message.text = message.text.substr(1, message.text.length);
             try {
                 web.channels.info(message.channel).then(info => {
@@ -52,7 +42,7 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
                     }
                 }).catch(function (e) {
                     //console.log(e);
-                    console.log("This is private channel sent");
+                    //console.log("This is private channel sent");
                     prepareMessage(message.user, message, "");
                 });
             } catch(e) {
@@ -60,65 +50,58 @@ rtm.on(RTM_EVENTS.MESSAGE, function handleRtmMessage(message) {
             }
         }
     } catch(e) {
-        console.log('Error caught...');
-        console.log(e);
+        //console.log(e);
     }
 });
 
 rtm.start();
 
 /**
- * Helper method for finding if part of a string exists in another string,
- * case insensitive
+ * Pads and prepends and extends message strings before sending it to a
+ * recipient
+ * @param channel The channel the message is supposed to be sent to
+ * @param message The contents of the message as it is now
+ * @param prepend What to prepend the message with, if anything
  */
-function contains(needle, haystack) {
-    let v = (haystack || '').toLowerCase();
-    let v2 = needle;
-    if (v2) {
-        v2 = v2.toLowerCase();
-    }
-    return v.indexOf(v2) > -1;
-}
-
 function prepareMessage(channel, message, prepend) {
     let command = undefined;
     let response = prepend;
     console.log(message.text);
     console.log(message.channel);
 
-
-
-    if(message.text === "!help" || message.text === "!hepl" || message.text === "!halp") {
+    // If message is help, skip checking if command exist
+    if(message.text === '!help') {
+        console.log("Command found!: " + message.text);
         command = message.text;
+        response += HELP_RESPONSE;
     } else {
+        // Walk through possible matches
         for(let i = 0; i < Object.keys(COMMANDS_PUBLIC).length; i++) {
             let item = Object.keys(COMMANDS_PUBLIC)[i];
             if(message.text === item) {
+                console.log("Command found!: " + message.text);
                 command = message.text;
             }
         }
-    }
-    if(command !== undefined) {
-        // TODO This duplication of code is really unnecessary. Fix it.
-        if(command === "!help" || command === "!hepl" || command === "!halp") {
-            console.log("This is halp command");
-            response += HELP_RESPONSE;
-            //console.log(response);
-            // https://github.com/slackapi/node-slack-sdk/issues/148
-            sendDM(channel, response);
-            return;
+
+        // Check if a valid command was found
+        if(command !== undefined) {
+            response += COMMANDS_PUBLIC[command];
+        } else {
+            console.log("Not understood...: " + message.text);
+            response += "BLEEP, BLOOP. I didn't understand that command.\n\n" + HELP_RESPONSE;
         }
-        console.log("Command found!: " +command);
-        response = COMMANDS_PUBLIC[command];
-        // https://github.com/slackapi/node-slack-sdk/issues/148
-    } else {
-        console.log("Not understood");
-        response += "BLEEP, BLOOP. I didn't understand that command.\n\n" + HELP_RESPONSE;
     }
     sendDM(channel, response);
 }
 
+/**
+ * Sends a message to a recipient
+ * @param channel The receiving channel; a user ID as a string
+ * @param message The complete message as a string
+ */
 function sendDM(channel, message) {
+    // https://github.com/slackapi/node-slack-sdk/issues/148
     web.im.open(channel, function(err, resp) {
         // Check `err` for any errors.
         // `resp` is the parsed response from the api.
